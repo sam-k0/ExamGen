@@ -1,0 +1,23 @@
+[project]
+name = "examgen"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "sam-k0",email = "56673835+sam-k0@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "dspy (>=3.0.1,<4.0.0)",
+    "pypdf (>=6.0.0,<7.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "examgen", from = "src"}]
+
+[tool.poetry.scripts]
+examgen = "src.examgen.main:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,5 @@
+
+key.txt
+baseurl.txt
+/src/examgen/__pycache__
+*.lock
