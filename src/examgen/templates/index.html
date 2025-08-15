@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ExamgGen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>ExamGen</h1>
+    <form method="POST" enctype="multipart/form-data" id="mainForm">
+        <label for="questionsnumber">Number of Questions</label><br>
+        <input type="number" id="questionsnumber" name="questionsnumber"><br><br>
+
+        <label for="langdropdown">Language:</label><br>
+        <select id="langdropdown" name="langdropdown">
+            <option value="English">English</option>
+            <option value="Korean">Korean</option>
+        </select><br><br>
+
+        <input type="checkbox" id="qbool" name="options" value="qbool">
+        <label for="qbool">True / False</label><br>
+
+        <input type="checkbox" id="qmulti" name="options" value="qmulti">
+        <label for="qmulti">Multiple Choice</label><br>
+
+        <input type="checkbox" id="qwrite" name="options" value="qwrite">
+        <label for="qwrite">Writing answer</label><br>
+
+
+        <label for="pdf_file">Upload PDF:</label><br>
+        <input type="file" id="pdf_file" name="pdf_file"><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+    <div id="loadingdiv">Generating can take a while. Download will start when ready.</div>
+
+    <div id="error">{{error}}</div>
+
+</body>
+</html>
