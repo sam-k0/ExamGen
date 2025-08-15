@@ -4,6 +4,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.units import inch
 
 class FileContent:
     def __init__(self) -> None:
@@ -19,7 +20,7 @@ class FileContent:
     
 
 
-def write_pdf(fpath: str, content: list[str]):
+def write_pdf(fpath: str, content: list[str], topic = ""):
     doc = SimpleDocTemplate(fpath, pagesize=letter)
     
     font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
@@ -39,6 +40,9 @@ def write_pdf(fpath: str, content: list[str]):
     ))
 
     story = []
+    story.append(Paragraph(topic, styles["KoreanNormal"].clone('Title', fontSize=18, leading=22)))
+    story.append(Spacer(1, 0.25 * inch))  # space after title
+
     for item in content:
         # Bullet point for question
         bullet = ListFlowable(

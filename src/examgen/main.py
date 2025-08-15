@@ -1,5 +1,4 @@
 import dspy
-import typing
 from . import tools, pdfextract, signatures, pipeline
 
 SHOW_QUESTIONS = False
@@ -19,7 +18,7 @@ dspy.configure(lm=LM)
 def main():
     # Somehow get pdf content here
     pdf_content = pdfextract.FileContent()
-    pdf_content.read_file("pdfs/test.pdf")
+    pdf_content.read_file("pdfs/input_4.pdf")
     all_text = pdf_content.get_all_text()
 
     print(f"Read {len(pdf_content.text_pages)} pages.")
@@ -34,12 +33,13 @@ def main():
     ) # type: ignore
 
     nq:list[str] = result.new_questions  # type: ignore
-    print(f"Generated {len(nq)} questions.")
+    t:str = result.topic # type: ignore
+    print(f"Generated {len(nq)} questions for topic {t}")
 
     if SHOW_QUESTIONS:
         for q in nq:
             print(q, end="\n----\n")
 
     #save pdf
-    pdfextract.write_pdf(OUTPUT_PDF, nq)
+    pdfextract.write_pdf(OUTPUT_PDF, nq, t)
     print(f"Saved output pdf to {OUTPUT_PDF}")

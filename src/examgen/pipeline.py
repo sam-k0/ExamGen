@@ -1,5 +1,4 @@
 import dspy
-import typing
 from . import signatures
 
 class QuestionGenerator(dspy.Module):
@@ -39,7 +38,8 @@ class QuestionGenerator(dspy.Module):
         )
 
         return dspy.Prediction(
-            new_questions = generated_questions.output_content # type: ignore
+            new_questions = generated_questions.output_content, # type: ignore
+            topic = generated_questions.topic # type: ignore
         )
     
 

@@ -1,6 +1,4 @@
 import dspy
-import typing
-import json
 from enum import Enum
 
 class QuestionType(Enum):
@@ -67,5 +65,9 @@ class GenerateQuestions(dspy.Signature):
     output_content:list[str] = dspy.OutputField(
         desc="Newly generated possible exam questions."
         )
+    
+    topic:str= dspy.OutputField(
+        desc="Short Title for the generated set of questions."
+    )
 
 
