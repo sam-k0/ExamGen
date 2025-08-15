@@ -1,7 +1,14 @@
 import pypdf
 
-def extract_text(pdf_path:str) -> str:
-    text = ""
-    for page in pypdf.PdfReader(pdf_path).pages:
-        text += page.extract_text() or ""
-    return text
+
+class FileContent:
+    def __init__(self) -> None:
+        self.text_pages = []
+    
+    # Read fpath and write in text_pages
+    def read_file(self, fpath = ""):
+        for p in pypdf.PdfReader(fpath).pages:
+            self.text_pages.append(p.extract_text() or "")
+
+    def get_all_text(self) -> str:
+        return "\n".join(self.text_pages)
