@@ -20,39 +20,36 @@ class FileContent:
     
 
 
-def write_pdf(fpath: str, content: list[str], topic = ""):
+def write_pdf(fpath: str, content: list[str], topic = "", font_path=""):
     doc = SimpleDocTemplate(fpath, pagesize=letter)
-    
-    font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
-    pdfmetrics.registerFont(TTFont("NanumGothic", font_path))
-    
-
-    doc = SimpleDocTemplate(fpath, pagesize=letter)
-
-    # Create a style that uses our Korean-capable font
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(
-        name="KoreanNormal",
-        parent=styles["Normal"],
-        fontName="NanumGothic",
-        fontSize=12,
-        leading=14
-    ))
+    stylename = "Normal"
+
+    if font_path != "":
+        stylename = "KoreanNormal"
+        pdfmetrics.registerFont(TTFont("NanumGothic", font_path))
+        styles.add(ParagraphStyle(
+            name="KoreanNormal",
+            parent=styles["Normal"],
+            fontName="NanumGothic",
+            fontSize=12,
+            leading=14
+        ))
 
     story = []
-    story.append(Paragraph(topic, styles["KoreanNormal"].clone('Title', fontSize=18, leading=22)))
+    story.append(Paragraph(topic, styles[stylename].clone('Title', fontSize=18, leading=22)))
     story.append(Spacer(1, 0.25 * inch))  # space after title
 
     for item in content:
         # Bullet point for question
         bullet = ListFlowable(
-            [ListItem(Paragraph(item, styles["KoreanNormal"]))], # type: ignore
+            [ListItem(Paragraph(item, styles[stylename]))], # type: ignore
             bulletType='bullet'
         )
         story.append(bullet)
 
         # Answer label
-        story.append(Paragraph("Answer:", styles["KoreanNormal"]))
+        story.append(Paragraph("Answer:", styles[stylename]))
         story.append(Spacer(1, 12))
 
     doc.build(story)

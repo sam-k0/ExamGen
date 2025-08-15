@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 SHOW_QUESTIONS = False
-LANGUAGE = "Korean"
+LANGUAGE = "English"
 QUESTION_TYPES = [
             signatures.QuestionType.MULTIPLE_CHOICE.value,
             signatures.QuestionType.TRUE_FALSE.value,
@@ -12,6 +12,12 @@ QUESTION_TYPES = [
         ]
 NUM_QUESTIONS = 20
 OUTPUT_PDF = "pdfs/output.pdf"
+
+# FONTPATH defines a font override if your language is not supported by default fonts
+# This will most likely be the case for any non-Ascii contained characters.
+# If you do not use any problematic characters, set FONTPATH to an empty string ""
+# FONTPATH = ""
+FONTPATH = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
 
 load_dotenv()
 LM = dspy.LM(model=os.getenv("LLM") or "", api_base=os.getenv("URL"), api_key=os.getenv("KEY"))
@@ -42,6 +48,6 @@ def main():
         for q in nq:
             print(q, end="\n----\n")
 
-    #save pdf
-    pdfextract.write_pdf(OUTPUT_PDF, nq, t)
+    #save pdf 
+    pdfextract.write_pdf(OUTPUT_PDF, nq, t,FONTPATH)
     print(f"Saved output pdf to {OUTPUT_PDF}")

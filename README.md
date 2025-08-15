@@ -28,3 +28,6 @@ This uses Poetry.
 - "dspy (>=3.0.1,<4.0.0)",
 - "pypdf (>=6.0.0,<7.0.0)",
 - "reportlab (>=4.4.3,<5.0.0)"
+
+On Linux, you may be missing fonts depending on your language.
+For Korean, that is `fonts-nanum`. (`sudo apt install fonts-nanum`)
