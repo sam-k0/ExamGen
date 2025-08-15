@@ -54,7 +54,7 @@ class GenerateQuestions(dspy.Signature):
         )
     
     language:str = dspy.InputField(
-        desc="Language to use for generated questions."
+        desc="Language to use for generated questions. Please only stick to that language, exceptions can be specific keywords."
         )
     
     question_types:list[str] = dspy.InputField(

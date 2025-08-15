@@ -2,6 +2,15 @@ import dspy
 import typing
 from . import tools, pdfextract, signatures, pipeline
 
+SHOW_QUESTIONS = False
+LANGUAGE = "Korean"
+QUESTION_TYPES = [
+            signatures.QuestionType.MULTIPLE_CHOICE.value,
+            signatures.QuestionType.TRUE_FALSE.value,
+            signatures.QuestionType.SHORT_ANSWER.value
+        ]
+NUM_QUESTIONS = 20
+OUTPUT_PDF = "pdfs/output.pdf"
 
 k,u = tools.load_secrets()
 LM = dspy.LM('ollama_chat/gemma3:27b', api_base=u, api_key=k)
@@ -19,19 +28,18 @@ def main():
 
     result = gen(
         input_text=all_text,
-        num_questions=5,
-        language="Korean",
-        question_types=[
-            signatures.QuestionType.MULTIPLE_CHOICE.value,
-            signatures.QuestionType.TRUE_FALSE.value,
-            signatures.QuestionType.SHORT_ANSWER.value
-        ]
+        num_questions=NUM_QUESTIONS,
+        language=LANGUAGE,
+        question_types=QUESTION_TYPES
     ) # type: ignore
 
     nq:list[str] = result.new_questions  # type: ignore
+    print(f"Generated {len(nq)} questions.")
 
-    for q in nq:
-        print(q)
+    if SHOW_QUESTIONS:
+        for q in nq:
+            print(q, end="\n----\n")
 
     #save pdf
-    pdfextract.write_pdf("pdfs/output.pdf", nq)
+    pdfextract.write_pdf(OUTPUT_PDF, nq)
+    print(f"Saved output pdf to {OUTPUT_PDF}")
