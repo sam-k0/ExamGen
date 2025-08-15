@@ -17,10 +17,21 @@ def main():
 
     gen = pipeline.QuestionGenerator()
 
-    result = gen(input_text=all_text, num_questions=5, language="Korean") # type: ignore
+    result = gen(
+        input_text=all_text,
+        num_questions=5,
+        language="Korean",
+        question_types=[
+            signatures.QuestionType.MULTIPLE_CHOICE.value,
+            signatures.QuestionType.TRUE_FALSE.value,
+            signatures.QuestionType.SHORT_ANSWER.value
+        ]
+    ) # type: ignore
+
     nq:list[str] = result.new_questions  # type: ignore
 
     for q in nq:
         print(q)
 
-
+    #save pdf
+    pdfextract.write_pdf("pdfs/output.pdf", nq)

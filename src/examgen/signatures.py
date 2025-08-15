@@ -1,6 +1,13 @@
 import dspy
 import typing
 import json
+from enum import Enum
+
+class QuestionType(Enum):
+    MULTIPLE_CHOICE = "Multiple Choice"
+    TRUE_FALSE = "True/False"
+    SHORT_ANSWER = "Short Answer"
+
 
 # Receives a string of read questions and structures them into a list of text rows
 class SplitFileContent(dspy.Signature):
@@ -50,6 +57,13 @@ class GenerateQuestions(dspy.Signature):
         desc="Language to use for generated questions."
         )
     
+    question_types:list[str] = dspy.InputField(
+        desc="List of question types to generate. Guidelines are:\
+            - Multiple Choice: A question with several answer options, only one of which is correct.\
+            - True/False: A statement that the student must identify as true or false.\
+            - Short Answer: A question that requires a brief, written response."
+        )
+
     output_content:list[str] = dspy.OutputField(
         desc="Newly generated possible exam questions."
         )

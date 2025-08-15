@@ -11,7 +11,7 @@ class QuestionGenerator(dspy.Module):
         self.extract_questions = dspy.ChainOfThought(signature=signatures.PreprocessQuestions)
         self.generate_questions = dspy.ChainOfThought(signature=signatures.GenerateQuestions)
 
-    def forward(self, input_text:str, num_questions:int, language="English"):
+    def forward(self, input_text:str, num_questions:int, language="English", question_types:list[str] = []):
         """process all given notes"""
 
         #Structure text and preprocess cause it could be nasty from OCR or pdf notes
@@ -34,6 +34,7 @@ class QuestionGenerator(dspy.Module):
             input_context=extracted_questions.output_context,  # type: ignore
             num_questions=num_questions,
             language=language,
+            question_types=question_types,
             input_prompt = "Examine given input_context and input_content to generate new possible questions to study."
         )
 
