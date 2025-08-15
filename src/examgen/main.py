@@ -2,6 +2,7 @@ import dspy
 from . import tools, pdfextract, signatures, pipeline
 import os
 from dotenv import load_dotenv
+import crossfiledialog
 
 SHOW_QUESTIONS = False
 LANGUAGE = "English"
@@ -26,7 +27,11 @@ dspy.configure(lm=LM)
 def main():
     # Somehow get pdf content here
     pdf_content = pdfextract.FileContent()
-    pdf_content.read_file("pdfs/input_4.pdf")
+    pdf_path = crossfiledialog.open_file(filter="*.pdf")
+    if pdf_path == "":
+        print("Select a pdf file.")
+        return 0
+    pdf_content.read_file(pdf_path)
     all_text = pdf_content.get_all_text()
 
     print(f"Read {len(pdf_content.text_pages)} pages.")

@@ -8,6 +8,7 @@ Generates exam questions from provided PDF documents containing notes, summaries
 - QUESTION_TYPES: Types of questions to generate (e.g., "multiple choice", "short answer").
 - NUM_QUESTIONS: The number of questions to generate.
 - OUTPUT_PDF: The file path where the generated PDF will be saved.
+- FONTPATH: (optional) Override font for special characters. Leave to `""` if not needed.
 
 ## Setup
 
@@ -27,7 +28,9 @@ This uses Poetry.
 ## Dependencies
 - "dspy (>=3.0.1,<4.0.0)",
 - "pypdf (>=6.0.0,<7.0.0)",
-- "reportlab (>=4.4.3,<5.0.0)"
+- "reportlab (>=4.4.3,<5.0.0)",
+- "python-dotenv (>=1.1.1,<2.0.0)",
+- "crossfiledialog (>=1.0.0,<2.0.0)"
 
 On Linux, you may be missing fonts depending on your language.
 For Korean, that is `fonts-nanum`. (`sudo apt install fonts-nanum`)
