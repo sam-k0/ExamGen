@@ -48,7 +48,7 @@ class GenerateQuestions(dspy.Signature):
         )
     
     num_questions:int = dspy.InputField(
-        desc="Number of new questions to generate."
+        desc="Number of new questions to generate. Follow this precisely."
         )
     
     language:str = dspy.InputField(

@@ -11,7 +11,18 @@ Generates exam questions from provided PDF documents containing notes, summaries
 
 ## Setup
 
-Provide `baseurl.txt` and `key.txt` files in the root directory.
+Provide a `.env` file in the root directory with the following variables:
+```
+URL=https://subdomain.domain.whatever
+KEY=apikey
+LLM=ollama_chat/yourmodel:8b
+```
+If you do not use a hosted model, refer to [this guide](https://dspy.ai/).
+
+This uses Poetry. 
+
+1. Install dependencies: `poetry install`
+2. Run module: `poetry run examgen`
 
 ## Dependencies
 - "dspy (>=3.0.1,<4.0.0)",

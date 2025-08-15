@@ -1,5 +1,7 @@
 import dspy
 from . import tools, pdfextract, signatures, pipeline
+import os
+from dotenv import load_dotenv
 
 SHOW_QUESTIONS = False
 LANGUAGE = "Korean"
@@ -11,8 +13,8 @@ QUESTION_TYPES = [
 NUM_QUESTIONS = 20
 OUTPUT_PDF = "pdfs/output.pdf"
 
-k,u = tools.load_secrets()
-LM = dspy.LM('ollama_chat/gemma3:27b', api_base=u, api_key=k)
+load_dotenv()
+LM = dspy.LM(model=os.getenv("LLM") or "", api_base=os.getenv("URL"), api_key=os.getenv("KEY"))
 dspy.configure(lm=LM)
 
 def main():
