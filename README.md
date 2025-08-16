@@ -18,10 +18,13 @@ URL=https://subdomain.domain.whatever
 KEY=apikey
 LLM=ollama_chat/yourmodel:8b
 ```
+> [!TIP]
+> I recommend using larger models, gemma3:27b worked well.
+
+
 If you do not use a hosted model, refer to [this guide](https://dspy.ai/).
 
-This uses Poetry. 
-
+This uses Poetry: 
 1. Install dependencies: `poetry install`
 2. Run module: `poetry run examgen`
 
