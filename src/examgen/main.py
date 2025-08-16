@@ -74,7 +74,9 @@ def index():
                         qtypes.append(signatures.QuestionType.SHORT_ANSWER.value)
 
                     if not qtypes:
-                        qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value]
+                        qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value,
+                                  signatures.QuestionType.TRUE_FALSE.value,
+                                  signatures.QuestionType.SHORT_ANSWER.value]
 
                     dlpath = process(pdf_file=tmp_path, num_q=num_questions, lang=language_select, types=qtypes)
                     response = make_response(open(dlpath, 'rb').read())
@@ -83,7 +85,7 @@ def index():
                     return response
                 except Exception as e:
                     print(f"Error processing PDF: {e}")
-                    return render_template('index.html', error=str(e) + " Please revise inputs.")
+                    return render_template('index.html', error=str(e) + ". Please revise inputs.")
 
         return render_template('index.html')
 

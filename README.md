@@ -30,7 +30,7 @@ This uses Poetry.
 - "pypdf (>=6.0.0,<7.0.0)",
 - "reportlab (>=4.4.3,<5.0.0)",
 - "python-dotenv (>=1.1.1,<2.0.0)",
-- "crossfiledialog (>=1.0.0,<2.0.0)"
+- "flask (>=3.1.1,<4.0.0)"
 
 On Linux, you may be missing fonts depending on your language.
 For Korean, that is `fonts-nanum`. (`sudo apt install fonts-nanum`)

@@ -7,15 +7,19 @@
 <body>
     <h1>ExamGen</h1>
     <form method="POST" enctype="multipart/form-data" id="mainForm">
+        <h3>Settings</h3>
         <label for="questionsnumber">Number of Questions</label><br>
-        <input type="number" id="questionsnumber" name="questionsnumber"><br><br>
+        <input type="number" id="questionsnumber" name="questionsnumber" required value="10"><br><br>
 
         <label for="langdropdown">Language:</label><br>
-        <select id="langdropdown" name="langdropdown">
+        <select id="langdropdown" name="langdropdown" required>
             <option value="English">English</option>
             <option value="Korean">Korean</option>
         </select><br><br>
 
+        <div>
+            <a>Question types</a>
+        </div>
         <input type="checkbox" id="qbool" name="options" value="qbool">
         <label for="qbool">True / False</label><br>
 
@@ -23,13 +27,13 @@
         <label for="qmulti">Multiple Choice</label><br>
 
         <input type="checkbox" id="qwrite" name="options" value="qwrite">
-        <label for="qwrite">Writing answer</label><br>
+        <label for="qwrite">Short answer</label><br>
 
 
         <label for="pdf_file">Upload PDF:</label><br>
-        <input type="file" id="pdf_file" name="pdf_file"><br><br>
+        <input type="file" id="pdf_file" name="pdf_file" required><br><br>
 
-        <button type="submit">Submit</button>
+        <button type="submit">Generate</button>
     </form>
     <div id="loadingdiv">Generating can take a while. Download will start when ready.</div>
 
