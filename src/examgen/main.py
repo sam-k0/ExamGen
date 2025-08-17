@@ -21,7 +21,6 @@ dspy.configure(lm=LM)
 app = Flask(__name__,template_folder="templates")
 
 def process(pdf_file:str, num_q:int, lang:str, types:list):
-    # Somehow get pdf content here
     pdf_content = pdfextract.FileContent()
     pdf_content.read_file(pdf_file)
     all_text = pdf_content.get_all_text()
@@ -43,9 +42,9 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
 
     if SHOW_QUESTIONS:
         for q in nq:
-            print(q, end="\n----\n")
+            print(q, end="\n-\n")
 
-    #save pdf 
+    #save pdf with hash name
     hash = md5(all_text[:20].encode()).hexdigest()
     out_path = f"pdfs/output_{hash}.pdf"
     if os.path.exists(out_path):

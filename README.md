@@ -2,6 +2,8 @@
 
 Generates exam training questions from provided PDF documents containing notes, summaries, and other educational materials.
 
+![Pipeline](diagram.svg)
+
 ## Settings
 - SHOW_QUESTIONS: If set to `True`, the generated questions will be printed to the console.
 - FONTPATH: (optional) Override font for special characters. Leave to `""` if not needed.
@@ -16,7 +18,6 @@ LLM=ollama_chat/yourmodel:8b
 ```
 > [!TIP]
 > I recommend using larger models, gemma3:27b worked well.
-
 
 If you do not use a hosted model, refer to [this guide](https://dspy.ai/).
 
