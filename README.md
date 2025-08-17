@@ -8,7 +8,7 @@ Generates exam training questions from provided PDF documents containing notes, 
     - You can add as many as you want by editing `index.html`
 - Choose your style: Light, Dark, Modern (Violet)
 
-![Screenshot](img/screenshot.png)
+![Screenshot](img/screenshot_light.png)
 
 ![Pipeline](img/diagram.svg)
 
