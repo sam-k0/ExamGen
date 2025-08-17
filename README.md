@@ -6,6 +6,7 @@ Generates exam training questions from provided PDF documents containing notes, 
 - Customize question types (multiple choice, true/false, short answer)
 - Language support (Korean, English, etc.)
     - You can add as many as you want by editing `index.html`
+- Choose your style: Light, Dark, Modern (Violet)
 
 ![Screenshot](img/screenshot.png)
 
