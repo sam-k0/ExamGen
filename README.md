@@ -2,7 +2,9 @@
 
 Generates exam training questions from provided PDF documents containing notes, summaries, and other educational materials.
 
-![Pipeline](diagram.svg)
+![Screenshot](img/screenshot.png)
+
+![Pipeline](img/diagram.svg)
 
 
 ## Settings

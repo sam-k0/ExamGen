@@ -2,10 +2,13 @@
 <html>
 <head>
     <title>ExamGen</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style_modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_light.css') }}" id="theme-stylesheet">
 </head>
 <body>
     <h1>ExamGen</h1>
+    
+    <button id="themeButton">Switch Theme</button>
+    
     <form method="POST" enctype="multipart/form-data" id="mainForm">
         <h3>Settings</h3>
         <label for="questionsnumber">Number of Questions</label><br>
@@ -36,9 +39,36 @@
 
         <button type="submit">Generate</button>
     </form>
-    <div id="loadingdiv">Generating can take a while. Download will start when ready.<br>Powered by sussywussy.de AI cloud services.</div>
+    <div id="loadingdiv">Generating can take a while. Download will start when ready.</div>
 
     <div id="error">{{error}}</div>
-
 </body>
+<script>
+    const themeButton = document.getElementById('themeButton');
+    const themeStylesheet = document.getElementById('theme-stylesheet');
+    let currentTheme = 0;
+
+    themeButton.addEventListener('click', () => {
+
+        switch(currentTheme)
+        {
+            case 0:
+            currentTheme = 1;
+            themeStylesheet.href = "{{ url_for('static', filename='style_light.css') }}";
+            break;
+
+            case 1:
+            currentTheme = 2;
+            themeStylesheet.href = "{{ url_for('static', filename='style_dark.css') }}";
+            break;
+            
+            case 2:
+            currentTheme = 0;
+            themeStylesheet.href = "{{ url_for('static', filename='style_modern.css') }}";
+            break;
+            
+
+        }
+    });
+</script>
 </html>
