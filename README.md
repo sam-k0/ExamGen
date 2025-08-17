@@ -2,6 +2,11 @@
 
 Generates exam training questions from provided PDF documents containing notes, summaries, and other educational materials.
 
+- Generate as many questions as you want
+- Customize question types (multiple choice, true/false, short answer)
+- Language support (Korean, English, etc.)
+    - You can add as many as you want by editing `index.html`
+
 ![Screenshot](img/screenshot.png)
 
 ![Pipeline](img/diagram.svg)
