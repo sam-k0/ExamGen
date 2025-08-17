@@ -37,7 +37,7 @@ def write_pdf(fpath: str, content: list[str], topic = "", font_path=""):
         ))
 
     story = []
-    story.append(Paragraph(topic, styles[stylename].clone('Title', fontSize=18, leading=22)))
+    story.append(Paragraph(topic + f" ({len(content)} Questions)", styles[stylename].clone('Title', fontSize=18, leading=22)))
     story.append(Spacer(1, 0.25 * inch))  # space after title
 
     for item in content:

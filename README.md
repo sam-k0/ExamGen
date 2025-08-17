@@ -1,13 +1,9 @@
 # ExamGen
 
-Generates exam questions from provided PDF documents containing notes, summaries, and other educational materials.
+Generates exam training questions from provided PDF documents containing notes, summaries, and other educational materials.
 
 ## Settings
 - SHOW_QUESTIONS: If set to `True`, the generated questions will be printed to the console.
-- LANGUAGE: The language in which the questions should be generated (e.g., "English", "Korean").
-- QUESTION_TYPES: Types of questions to generate (e.g., "multiple choice", "short answer").
-- NUM_QUESTIONS: The number of questions to generate.
-- OUTPUT_PDF: The file path where the generated PDF will be saved.
 - FONTPATH: (optional) Override font for special characters. Leave to `""` if not needed.
 
 ## Setup

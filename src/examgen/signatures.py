@@ -59,9 +59,10 @@ class GenerateQuestions(dspy.Signature):
     
     question_types:list[str] = dspy.InputField(
         desc="List of question types to generate. Guidelines are:\
-            - Multiple Choice: A question with several answer options, only one of which is correct.\
+            - Multiple Choice: A question with several answer options, only one of which is correct. You MUST provide the answer options in your generated response.\
             - True/False: A statement that the student must identify as true or false.\
-            - Short Answer: A question that requires a brief, written response."
+            - Short Answer: A question that requires a brief, written response.\
+                If all three types are selected, you MUST provide questions for each type."
         )
 
     output_content:list[str] = dspy.OutputField(

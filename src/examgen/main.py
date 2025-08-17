@@ -4,10 +4,10 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, make_response
 import tempfile
+import webbrowser
+from hashlib import md5
 
 SHOW_QUESTIONS = False
-OUTPUT_PDF = "pdfs/output.pdf"
-
 # FONTPATH defines a font override if your language is not supported by default fonts
 # This will most likely be the case for any non-Ascii contained characters.
 # If you do not use any problematic characters, set FONTPATH to an empty string ""
@@ -46,9 +46,14 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
             print(q, end="\n----\n")
 
     #save pdf 
-    pdfextract.write_pdf(OUTPUT_PDF, nq, t,FONTPATH)
-    print(f"Saved output pdf to {OUTPUT_PDF}")
-    return OUTPUT_PDF
+    hash = md5(all_text[:20].encode()).hexdigest()
+    out_path = f"pdfs/output_{hash}.pdf"
+    if os.path.exists(out_path):
+        os.remove(out_path)
+
+    pdfextract.write_pdf(out_path, nq, t,FONTPATH)
+    print(f"Saved output pdf to {out_path}")
+    return out_path
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -92,4 +97,6 @@ def index():
     return render_template('index.html')
 
 def main():
+    webbrowser.open("http://127.0.0.1:5000/")
     app.run(debug=True)
+    
