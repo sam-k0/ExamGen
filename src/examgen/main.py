@@ -7,7 +7,7 @@ import tempfile
 import webbrowser
 from hashlib import md5
 
-SHOW_QUESTIONS = False
+SHOW_QUESTIONS = True
 # FONTPATH defines a font override if your language is not supported by default fonts
 # This will most likely be the case for any non-Ascii contained characters.
 # If you do not use any problematic characters, set FONTPATH to an empty string ""
@@ -36,13 +36,24 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
         question_types=types
     ) # type: ignore
 
+    # nq: New Questions
+    # qa: Question answers
+    # t: Topic
     nq:list[str] = result.new_questions  # type: ignore
+    qa:dict[str,str] = result.answers # type: ignore
     t:str = result.topic # type: ignore
+
     print(f"Generated {len(nq)} questions for topic {t}")
 
     if SHOW_QUESTIONS:
         for q in nq:
             print(q, end="\n-\n")
+
+        print("-"*15)
+
+        for k,v in qa.items():
+            print(f"Question: {k}")
+            print(f"Answer: {v}")
 
     #save pdf with hash name
     hash = md5(all_text[:20].encode()).hexdigest()
@@ -50,7 +61,7 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
     if os.path.exists(out_path):
         os.remove(out_path)
 
-    pdfextract.write_pdf(out_path, nq, t,FONTPATH)
+    pdfextract.write_pdf_with_answers(out_path, qa, t,FONTPATH)
     print(f"Saved output pdf to {out_path}")
     return out_path
 
@@ -97,5 +108,5 @@ def index():
 
 def main():
     webbrowser.open("http://127.0.0.1:5000/")
-    app.run(debug=True)
-    
+    app.run(debug=True, host="0.0.0.0", port=5000)
+

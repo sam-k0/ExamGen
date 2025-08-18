@@ -69,8 +69,32 @@ class GenerateQuestions(dspy.Signature):
         desc="Newly generated possible exam questions."
         )
     
+    
     topic:str= dspy.OutputField(
         desc="Short Title for the generated set of questions."
     )
 
+
+class GenerateAnswers(dspy.Signature): 
+    input_content:list[str] = dspy.InputField(
+        desc="Previously generated questions about the given context."
+    )
+
+    input_context:str = dspy.InputField(
+        desc = "All relevant domain-related context found in student's notes.\
+            Use this information to generate correct answers for the given questions."
+    )
+
+    input_question_types:list[str] = dspy.InputField(
+        desc="List of question types. The given input questions and this question_types list are in correct order, so you can match them directly."
+        )
+
+    input_prompt:str=dspy.InputField(
+        desc="Generic prompt for your current task. Please follow given instructions closely."
+    )
+
+    output_content:dict[str, str] = dspy.OutputField(
+        desc= "Dictionary of [Question,Answer] key-value pairs.\
+            The key must be the generated question, while the value should be the fitting answer for that question."
+    )
 

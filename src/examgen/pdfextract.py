@@ -1,5 +1,5 @@
 import pypdf
-from reportlab.platypus import SimpleDocTemplate, Paragraph, ListFlowable, ListItem, Spacer
+from reportlab.platypus import SimpleDocTemplate, Paragraph, ListFlowable, ListItem, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
@@ -54,6 +54,66 @@ def write_pdf(fpath: str, content: list[str], topic = "", font_path=""):
 
         # Answer label
         story.append(Paragraph("Answer:", styles[stylename]))
+        story.append(Spacer(1, 12))
+
+    doc.build(story)
+
+
+def write_pdf_with_answers(fpath: str, content: dict[str,str], topic = "", font_path=""):
+    doc = SimpleDocTemplate(fpath, pagesize=letter)
+    styles = getSampleStyleSheet()
+    stylename = "Normal"
+
+    # Use Korean font if specified and available
+    if font_path != "" and os.path.exists(font_path):
+        stylename = "KoreanNormal"
+        pdfmetrics.registerFont(TTFont("NanumGothic", font_path))
+        styles.add(ParagraphStyle(
+            name="KoreanNormal",
+            parent=styles["Normal"],
+            fontName="NanumGothic",
+            fontSize=12,
+            leading=14
+        ))
+    else:
+        print(f"Using fallback font as {font_path} does not exist.")
+
+    story = []
+    story.append(Paragraph(topic + f" ({len(content)})", styles[stylename].clone('Title', fontSize=18, leading=22)))
+    story.append(Spacer(1, 0.25 * inch))  # space after title
+
+    for question, answer in content.items():
+        # Bullet point for question
+        bullet = ListFlowable(
+            [ListItem(Paragraph(question, styles[stylename]))], # type: ignore
+            bulletType='bullet'
+        )
+        story.append(bullet)
+
+        # Answer label
+        story.append(Spacer(1,8))
+        story.append(Paragraph("Answer:", styles[stylename]))
+        story.append(Spacer(1, 12))
+
+    # Blank page
+    story.append(PageBreak())
+    story.append(Paragraph("Answers on the next page", styles[stylename].clone('Title', fontSize=18, leading=22)))
+    story.append(PageBreak())
+
+
+    # Answers to the questions
+    story.append(Paragraph("Answers", styles[stylename].clone('Title', fontSize=18, leading=22)))
+    for question, answer in content.items():
+        # Bullet point for question
+        bullet = ListFlowable(
+            [ListItem(Paragraph(question, styles[stylename]))], # type: ignore
+            bulletType='bullet'
+        )
+        story.append(bullet)
+
+        # Answer label
+        story.append(Spacer(1,8))
+        story.append(Paragraph(f"Answer: {answer}", styles[stylename]))
         story.append(Spacer(1, 12))
 
     doc.build(story)
