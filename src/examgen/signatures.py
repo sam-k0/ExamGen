@@ -98,3 +98,19 @@ class GenerateAnswers(dspy.Signature):
             The key must be the generated question, while the value should be the fitting answer for that question."
     )
 
+class BatchGradeAnswers(dspy.Signature):
+    input_content:dict[str,tuple[str,str]] = dspy.InputField(
+        desc="Dictionary of [Question,[generatedAnswer, StudentAnswer]] key-value pairs.\
+            The key is the question, while the value is the student's given answer."
+    )
+    input_context:str = dspy.InputField(
+        desc="All relevant domain-related context found in student's notes.\
+            Use this information to generate correct answers for the given questions."
+    )
+    input_prompt:str = dspy.InputField(
+        desc="Generic prompt for your current task. Please follow given instructions closely."
+    )
+    output_content:dict[str, tuple[bool, str]] = dspy.OutputField(
+        desc="Dictionary of [Question,IsCorrect] key-value pairs.\
+            The key is the question, while the value is a tuple of bool for correct or incorrect, and str is the reasoning why it was graded that way."
+    )

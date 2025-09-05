@@ -57,4 +57,20 @@ class QuestionGenerator(dspy.Module):
     
 
 
+class GradeAnswers(dspy.Module):
+    def __init__(self, callbacks=None):
+        super().__init__(callbacks)
+
+        self.grade_answers = dspy.ChainOfThought(signature=signatures.BatchGradeAnswers)
+
+    def forward(self,input_content:dict[str,tuple[str,str]], input_context:str):
+        results = self.grade_answers(
+            input_content=input_content,
+            input_context=input_context, 
+            input_prompt="You are given the correct answers and student answers for exam questions.\
+            Your task is to grade them wether they are correct (True) or incorrect (False).\
+            Please give short reasoning why you decided to grade the answer the way you did.")
         
+        return dspy.Prediction(
+            graded_results = results.output_content #type: ignore
+        )

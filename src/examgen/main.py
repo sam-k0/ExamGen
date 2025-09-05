@@ -54,7 +54,9 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
         for k,v in qa.items():
             print(f"Question: {k}")
             print(f"Answer: {v}")
-
+    return nq,qa,t
+    
+def make_pdf(qa:dict[str,str], all_text:str, t:str):
     #save pdf with hash name
     hash = md5(all_text[:20].encode()).hexdigest()
     out_path = f"pdfs/output_{hash}.pdf"
@@ -65,44 +67,105 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
     print(f"Saved output pdf to {out_path}")
     return out_path
 
+def build_html(qa:dict[str, str]):
+    template = """
+<label for="sanswer{questionid}">{questionstr}</label>
+<input type="text" id="sanswer{questionid}" name="sanswer{questionid}">
+<input type="hidden" id="canswer{questionid}" name="canswer{questionid}" value="{answer}">
+<input type="hidden" id="question{questionid}" name="question{questionid}" value="{questionstr}">
+<br><br>
+"""
+
+    output_html = ""
+    c = 0
+    for question, correct_answer in qa.items():
+        c += 1
+        output_html += template.format(questionid = c, questionstr = question, answer=correct_answer)
+    return output_html
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if 'pdf_file' in request.files:
-            pdf_file = request.files['pdf_file']
+        if request.form.get('menu') == "index":
+            if 'pdf_file' in request.files:
+                pdf_file = request.files['pdf_file']
+                with tempfile.NamedTemporaryFile(delete=True, suffix=".pdf") as tmp:
+                    pdf_file.save(tmp)
+                    tmp_path = tmp.name
+                    print("temp pdf path: ",tmp_path)
+                    # options
+                    try:
+                        num_questions = int(request.form.get('questionsnumber', 5))  # Default to 5 if not provided
+                        language_select = request.form.get('langdropdown', 'English')  # Default to English if not provided
 
-            with tempfile.NamedTemporaryFile(delete=True, suffix=".pdf") as tmp:
-                pdf_file.save(tmp)
-                tmp_path = tmp.name
+                        qtypes = [] # question types
+                        if 'qmulti' in request.form:
+                            qtypes.append(signatures.QuestionType.MULTIPLE_CHOICE.value)
+                        if 'qbool' in request.form:
+                            qtypes.append(signatures.QuestionType.TRUE_FALSE.value)
+                        if 'qwrite' in request.form:
+                            qtypes.append(signatures.QuestionType.SHORT_ANSWER.value)
+
+                        if not qtypes:
+                            qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value,
+                                    signatures.QuestionType.TRUE_FALSE.value,
+                                    signatures.QuestionType.SHORT_ANSWER.value]
+
+                        nq,qa,t = process(pdf_file=tmp_path, num_q=num_questions, lang=language_select, types=qtypes)
+                        response = None
+                        if request.form.get('outputtype') == False: # pdf output
+
+                            dlpath = make_pdf(qa, all_text="".join(nq), t=t) # build pdf here
+                            response = make_response(open(dlpath, 'rb').read())
+                            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(dlpath)}'
+                        else: # assemble quiz
+                            html_content = build_html(qa)
+                            response = render_template('quiz.html', content=html_content, topic=t,num_questions=num_questions)
+
+
+                        return response
+                    except Exception as e:
+                        print(f"Error processing PDF: {e}")
+                        return render_template('index.html', error=str(e) + ". Please revise inputs.")
+
+            return render_template('index.html')
+        elif request.form.get('menu') == "quiz":
+            print("Quiz handler triggered")
+            # get num of questions
+            num_questions = int(request.form.get("num_questions")) #type:ignore
+            build_dict = {}
+
+            for i in range(1, num_questions + 1):
+                student_answer = request.form.get(f"sanswer{i}")
+                correct_answer = request.form.get(f"canswer{i}")
+                question = request.form.get(f"question{i}")
+                # assemble dict for llm, expects dict[str,tuple[str,str]]
+                print("Question:",question)
+                print("Student:",student_answer)
+                print("correct:",correct_answer)
+                print("-"*10)
+
+                build_dict[question] = (correct_answer, student_answer)
+
+
+            print(build_dict)
+            #grade answers
             
-                # options
-                try:
-                    num_questions = int(request.form.get('questionsnumber', 5))  # Default to 5 if not provided
-                    language_select = request.form.get('langdropdown', 'English')  # Default to English if not provided
+            grading = pipeline.GradeAnswers()
+            results = grading(
+                build_dict,
+                ""
+            )
 
-                    qtypes = [] # question types
-                    if 'multiple_choice' in request.form:
-                        qtypes.append(signatures.QuestionType.MULTIPLE_CHOICE.value)
-                    if 'true_false' in request.form:
-                        qtypes.append(signatures.QuestionType.TRUE_FALSE.value)
-                    if 'short_answer' in request.form:
-                        qtypes.append(signatures.QuestionType.SHORT_ANSWER.value)
+            # return template with grades
+            graded:dict[str, tuple[bool, str]] = results.graded_results #type:ignore
+            print("#"*10)
+            print(graded)
 
-                    if not qtypes:
-                        qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value,
-                                  signatures.QuestionType.TRUE_FALSE.value,
-                                  signatures.QuestionType.SHORT_ANSWER.value]
+            # TODO: Pass RAGged context from previous output as invisible form parameter
+            # TODO: Visualize results
 
-                    dlpath = process(pdf_file=tmp_path, num_q=num_questions, lang=language_select, types=qtypes)
-                    response = make_response(open(dlpath, 'rb').read())
-                    response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(dlpath)}'
-
-                    return response
-                except Exception as e:
-                    print(f"Error processing PDF: {e}")
-                    return render_template('index.html', error=str(e) + ". Please revise inputs.")
-
-        return render_template('index.html')
 
     return render_template('index.html')
 

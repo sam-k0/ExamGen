@@ -10,10 +10,11 @@
     <button id="themeButton">Switch Theme</button>
     
     <form method="POST" enctype="multipart/form-data" id="mainForm">
+        
         <h3>Settings</h3>
         <label for="questionsnumber">Number of Questions</label><br>
         <input type="number" id="questionsnumber" name="questionsnumber" required value="10"><br><br>
-
+        <input type="hidden" id="menu" name="menu" value="index">
         <label for="langdropdown">Language:</label><br>
         <select id="langdropdown" name="langdropdown" required>
             <option value="English">English 🇬🇧</option>
@@ -36,6 +37,9 @@
 
         <label for="pdf_file">Upload PDF:</label><br>
         <input type="file" id="pdf_file" name="pdf_file" required><br><br>
+
+        <input type="checkbox" id="outputtype" name="options" value="outputtype">
+        <label for="outputtype">Answer in quiz</label><br>
 
         <button type="submit">Generate</button>
     </form>

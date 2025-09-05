@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ExamGen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_light.css') }}" id="theme-stylesheet">
+</head>
+<body>
+    <h1>ExamGen</h1>
+    <h2>Quiz on: {{topic}}</h2>
+    <button id="themeButton">Switch Theme</button>
+    <!--Inserted here-->
+    <form method="POST" enctype="multipart/form-data" id="mainForm">
+        <input type="hidden" id="menu" name="menu" value="quiz">
+        <input type="hidden" id="num_questions" name="num_questions" value="{{num_questions}}">
+        {{content | safe}}
+        <button type="submit">Grade!</button>
+    </form>
+</body>
+<script>
+    const themeButton = document.getElementById('themeButton');
+    const themeStylesheet = document.getElementById('theme-stylesheet');
+    let currentTheme = 0;
+
+    themeButton.addEventListener('click', () => {
+
+        switch(currentTheme)
+        {
+            case 0:
+            currentTheme = 1;
+            themeStylesheet.href = "{{ url_for('static', filename='style_light.css') }}";
+            break;
+
+            case 1:
+            currentTheme = 2;
+            themeStylesheet.href = "{{ url_for('static', filename='style_dark.css') }}";
+            break;
+            
+            case 2:
+            currentTheme = 0;
+            themeStylesheet.href = "{{ url_for('static', filename='style_modern.css') }}";
+            break;
+            
+
+        }
+    });
+</script>
+</html>
