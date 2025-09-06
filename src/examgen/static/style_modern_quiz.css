@@ -1,0 +1,106 @@
+/* Global reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Color Palette - Purple-Blue Fade */
+:root {
+  --primary-purple: #ac66e9;
+  --secondary-purple: #886cae;
+  --tertiary-purple: #a188c9;
+  --primary-blue: #4a69bd;
+  --secondary-blue: #6483de;
+  --text-color: #e9ecef;
+  --light-text-color: #ced4da;
+  --background-color: #1e272e; /* Dark background */
+  --form-color: #24292e; /* Slightly lighter form background */
+  --border-color: rgba(255, 255, 255, 0.1); /* Very subtle border */
+}
+
+/* 3-Color Gradient Background (body) - to prevent repeating gradient */
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: linear-gradient(to bottom, var(--primary-purple), var(--primary-blue), var(--primary-purple));
+  color: var(--text-color);
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  min-height: 100vh; /*Ensure gradient fills the viewport*/
+}
+
+/* Heading */
+h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  color: #f8f9fa; /* Very light heading color */
+  margin-bottom: 1.5rem;
+}
+
+/* Form Container - Rounded Corners & Shadow */
+form {
+  background: var(--form-color);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+/* Labels */
+label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--light-text-color);
+}
+
+/* Inputs, Selects, and Textareas */
+input[type="number"],
+select,
+input[type="file"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #333; /* Darker input background */
+  color: var(--text-color);
+  outline: none;
+}
+
+/* Checkbox alignment */
+input[type="checkbox"] + label {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+
+/* Loading Div */
+#loadingdiv {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--light-text-color);
+  text-align: center;
+}
+
+/* Centering the button */
+button {
+  display: block;
+  margin: 0 auto;
+  background: var(--secondary-blue);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}

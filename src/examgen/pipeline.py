@@ -52,7 +52,8 @@ class QuestionGenerator(dspy.Module):
         return dspy.Prediction(
             new_questions = generated_questions.output_content, # type: ignore
             answers = generated_answers.output_content, #type: ignore
-            topic = generated_questions.topic # type: ignore
+            topic = generated_questions.topic, # type: ignore
+            context = extracted_questions.output_context #type:ignore
         )
     
 
@@ -63,13 +64,20 @@ class GradeAnswers(dspy.Module):
 
         self.grade_answers = dspy.ChainOfThought(signature=signatures.BatchGradeAnswers)
 
-    def forward(self,input_content:dict[str,tuple[str,str]], input_context:str):
+    def forward(self,input_questions:list[str],input_truths:list[str],input_student_answers:list[str], input_context:str):
         results = self.grade_answers(
-            input_content=input_content,
+            input_questions=input_questions,
+            input_truths=input_truths,
+            input_student_answers=input_student_answers,
             input_context=input_context, 
-            input_prompt="You are given the correct answers and student answers for exam questions.\
-            Your task is to grade them wether they are correct (True) or incorrect (False).\
-            Please give short reasoning why you decided to grade the answer the way you did.")
+            input_prompt="You are given the teacher's model answers and student answers for exam questions.\
+            If the Students answer is empty, you always have to grade it incorrect.\
+            So your job is to compare model answer and student answer, and grade if the student answered correctly in regards to the teachers model answer.\
+            Only use the context for reasoning your response. The initial grading decision must just be based on the model answer given to you.\
+            So if the model answer is True and the student answers False, you grade the answer as Incorrect/False.\
+            If the question is a multiple choice question and the model answer is A but the Student answers B or any unrelated text like 'I dont know' or leaves empty\
+            you grade it incorrect."
+            )
         
         return dspy.Prediction(
             graded_results = results.output_content #type: ignore

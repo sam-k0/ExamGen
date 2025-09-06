@@ -6,17 +6,17 @@
 </head>
 <body>
     <h1>ExamGen</h1>
-    <h2>Quiz on: {{topic}}</h2>
+    <h2>Results</h2>
     <button id="themeButton">Switch Theme</button>
     <!--Inserted here-->
+    <p>Score: {{correct}}/{{num_questions}}</p>
     <form method="POST" enctype="multipart/form-data" id="mainForm">
         {{content | safe}}
-        <button type="submit">Grade!</button>
+        <button type="submit">Return to front page</button>
         <!-- Hidden inputs to maintain state -->
-        <input type="hidden" id="menu" name="menu" value="quiz">
-        <input type="hidden" id="num_questions" name="num_questions" value="{{num_questions}}">
-        <input type="hidden" id="context" name="context" value="{{context}}">
+        <input type="hidden" id="menu" name="menu" value="results">
     </form>
+    <div id="loadingdiv">The grading was done by a Large Language Model and may not always be accurate.</div>
 </body>
 <script>
     const themeButton = document.getElementById('themeButton');

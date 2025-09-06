@@ -7,7 +7,6 @@ import tempfile
 import webbrowser
 from hashlib import md5
 
-SHOW_QUESTIONS = True
 # FONTPATH defines a font override if your language is not supported by default fonts
 # This will most likely be the case for any non-Ascii contained characters.
 # If you do not use any problematic characters, set FONTPATH to an empty string ""
@@ -42,19 +41,15 @@ def process(pdf_file:str, num_q:int, lang:str, types:list):
     nq:list[str] = result.new_questions  # type: ignore
     qa:dict[str,str] = result.answers # type: ignore
     t:str = result.topic # type: ignore
+    ctx:str = result.context #type: ignore
+
+
+    for k,v in qa.items():
+        print(f"Question: {k}")
+        print(f"Answer: {v}")
 
     print(f"Generated {len(nq)} questions for topic {t}")
-
-    if SHOW_QUESTIONS:
-        for q in nq:
-            print(q, end="\n-\n")
-
-        print("-"*15)
-
-        for k,v in qa.items():
-            print(f"Question: {k}")
-            print(f"Answer: {v}")
-    return nq,qa,t
+    return nq,qa,t, ctx
     
 def make_pdf(qa:dict[str,str], all_text:str, t:str):
     #save pdf with hash name
@@ -67,10 +62,11 @@ def make_pdf(qa:dict[str,str], all_text:str, t:str):
     print(f"Saved output pdf to {out_path}")
     return out_path
 
-def build_html(qa:dict[str, str]):
+def build_html_quiz(qa:dict[str, str]):
     template = """
-<label for="sanswer{questionid}">{questionstr}</label>
-<input type="text" id="sanswer{questionid}" name="sanswer{questionid}">
+<p id="question" name="question"><b>{questionstr}</b></p>
+<label for="sanswer{questionid}">Your answer:</label>
+<input type="text" id="sanswer{questionid}" name="sanswer{questionid}" required>
 <input type="hidden" id="canswer{questionid}" name="canswer{questionid}" value="{answer}">
 <input type="hidden" id="question{questionid}" name="question{questionid}" value="{questionstr}">
 <br><br>
@@ -83,6 +79,36 @@ def build_html(qa:dict[str, str]):
         output_html += template.format(questionid = c, questionstr = question, answer=correct_answer)
     return output_html
 
+
+def build_html_results(graded:dict[str, tuple[bool, str]], student_answers:list[str],truths:list[str]):
+    template="""
+<p id="question" name="question"><b>{questionstr}</b></p>
+<label for="sanswer{questionid}">Your answer:</label>
+<input type="text" id="sanswer{questionid}" name="sanswer{questionid}" value="{studentanswer}" disabled>
+<p id="correctanswer" name="correctanswer" style="color: {color};">Correct answer was: {correctanswer}</p>
+<p id="reasoning" name="reasoning">Reason: {reasoning}</p>
+<br><br>
+"""
+    output_html = ""
+    c = 0
+    correct = 0
+    for question, eval in graded.items():
+        is_correct:bool = eval[0]
+        reasoning:str = eval[1]
+        sanswer:str = student_answers[c]
+        canswer:str = truths[c]
+        # format
+        output_html += template.format(
+            questionid = c,
+            questionstr = question,
+            studentanswer = sanswer,
+            correctanswer = canswer,
+            reasoning = reasoning,
+            color = "green" if is_correct else "red"
+        )
+        correct += int(is_correct)
+        c+=1
+    return output_html, correct, len(truths)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -97,65 +123,76 @@ def index():
                     # options
                     try:
                         num_questions = int(request.form.get('questionsnumber', 5))  # Default to 5 if not provided
+                        num_questions = 1 if num_questions < 1 else num_questions # make sure its above 0
+
                         language_select = request.form.get('langdropdown', 'English')  # Default to English if not provided
+                        selected_options = request.form.getlist("options")  # list of checked values
+
+                        print(selected_options)
 
                         qtypes = [] # question types
-                        if 'qmulti' in request.form:
+                        if 'qmulti' in selected_options:
                             qtypes.append(signatures.QuestionType.MULTIPLE_CHOICE.value)
-                        if 'qbool' in request.form:
+                        if 'qbool' in selected_options:
                             qtypes.append(signatures.QuestionType.TRUE_FALSE.value)
-                        if 'qwrite' in request.form:
+                        if 'qwrite' in selected_options:
                             qtypes.append(signatures.QuestionType.SHORT_ANSWER.value)
+
+                        print(qtypes)
 
                         if not qtypes:
                             qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value,
                                     signatures.QuestionType.TRUE_FALSE.value,
                                     signatures.QuestionType.SHORT_ANSWER.value]
 
-                        nq,qa,t = process(pdf_file=tmp_path, num_q=num_questions, lang=language_select, types=qtypes)
-                        response = None
-                        if request.form.get('outputtype') == False: # pdf output
+                        nq,qa,t,ctx = process(pdf_file=tmp_path, num_q=num_questions, lang=language_select, types=qtypes)
 
+                        print(ctx)
+                        # nq - new questions
+                        # qa - question / correct answer
+                        # t - topic
+                        # ctx - context
+                        response = None
+                        if 'outputtype' not in selected_options: # pdf output
                             dlpath = make_pdf(qa, all_text="".join(nq), t=t) # build pdf here
                             response = make_response(open(dlpath, 'rb').read())
                             response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(dlpath)}'
                         else: # assemble quiz
-                            html_content = build_html(qa)
-                            response = render_template('quiz.html', content=html_content, topic=t,num_questions=num_questions)
-
-
+                            html_content = build_html_quiz(qa)
+                            response = render_template(
+                                'quiz.html',
+                                content=html_content,
+                                topic=t,
+                                num_questions=len(nq),
+                                context=ctx)
                         return response
+                    
                     except Exception as e:
                         print(f"Error processing PDF: {e}")
                         return render_template('index.html', error=str(e) + ". Please revise inputs.")
 
             return render_template('index.html')
         elif request.form.get('menu') == "quiz":
-            print("Quiz handler triggered")
             # get num of questions
-            num_questions = int(request.form.get("num_questions")) #type:ignore
-            build_dict = {}
+            num_questions = int(request.form.get("num_questions",1)) #type:ignore
+            context = request.form.get("context","")
+            
+            questions = []
+            studentanswers=[]
+            groundtruths=[]
 
-            for i in range(1, num_questions + 1):
-                student_answer = request.form.get(f"sanswer{i}")
-                correct_answer = request.form.get(f"canswer{i}")
-                question = request.form.get(f"question{i}")
-                # assemble dict for llm, expects dict[str,tuple[str,str]]
-                print("Question:",question)
-                print("Student:",student_answer)
-                print("correct:",correct_answer)
-                print("-"*10)
+            for i in range(1, num_questions + 1): # build lists
+                questions.append(request.form.get(f"question{i}"))
+                studentanswers.append(request.form.get(f"sanswer{i}"))
+                groundtruths.append(request.form.get(f"canswer{i}"))
 
-                build_dict[question] = (correct_answer, student_answer)
-
-
-            print(build_dict)
-            #grade answers
             
             grading = pipeline.GradeAnswers()
             results = grading(
-                build_dict,
-                ""
+                input_questions=questions,
+                input_truths=groundtruths,
+                input_student_answers=studentanswers,
+                input_context=context
             )
 
             # return template with grades
@@ -163,9 +200,11 @@ def index():
             print("#"*10)
             print(graded)
 
-            # TODO: Pass RAGged context from previous output as invisible form parameter
-            # TODO: Visualize results
-
+            # Visualize results
+            # results.html has args:
+            # correct,num_questions,content
+            htmlstr, correct, total = build_html_results(graded, studentanswers, groundtruths)
+            return render_template('results.html',content=htmlstr,correct=correct,num_questions=total)
 
     return render_template('index.html')
 

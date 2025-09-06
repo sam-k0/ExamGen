@@ -1,0 +1,92 @@
+/* Global reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Dark Mode Variables */
+:root {
+  --bg-color: #1a2027;
+  --text-color: #f8f9fa;
+  --light-text-color: #ced4da;
+  --primary-color: #667eea; /* A vibrant purple for buttons */
+  --secondary-color: #4338ca; /* Darker purple for hover */
+  --border-color: #333;
+  --box-shadow-color: rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+/* Dark Mode Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #e9ecef; /* Lighter heading */
+}
+
+form {
+  background: #24292e; /* Darker form background */
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--box-shadow-color);
+  width: 100%;
+  max-width: 800px;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+  color: var(--light-text-color);
+}
+
+input[type="number"],
+select,
+input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #333; /*Darker input field */
+  color: var(--text-color);
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+button {
+  display: block;
+  margin: 0 auto;
+  background: var(--primary-color);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: var(--secondary-color);
+}
+
+#loadingdiv {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--light-text-color);
+  text-align: center;
+}

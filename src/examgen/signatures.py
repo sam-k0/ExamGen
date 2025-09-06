@@ -99,10 +99,18 @@ class GenerateAnswers(dspy.Signature):
     )
 
 class BatchGradeAnswers(dspy.Signature):
-    input_content:dict[str,tuple[str,str]] = dspy.InputField(
-        desc="Dictionary of [Question,[generatedAnswer, StudentAnswer]] key-value pairs.\
-            The key is the question, while the value is the student's given answer."
+    input_questions:list[str] = dspy.InputField(
+        desc="List of questions"
     )
+
+    input_truths:list[str] = dspy.InputField(
+        desc="The Ground truth for answers to the questions"
+    )
+
+    input_student_answers:list[str] =dspy.InputField(
+        desc="The student given answers"
+    )
+
     input_context:str = dspy.InputField(
         desc="All relevant domain-related context found in student's notes.\
             Use this information to generate correct answers for the given questions."
