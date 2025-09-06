@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, make_response
 import tempfile
-import webbrowser
 from hashlib import md5
 
 # FONTPATH defines a font override if your language is not supported by default fonts
@@ -62,6 +61,7 @@ def make_pdf(qa:dict[str,str], all_text:str, t:str):
     print(f"Saved output pdf to {out_path}")
     return out_path
 
+# build html quiz from dict of questions and answers
 def build_html_quiz(qa:dict[str, str]):
     template = """
 <p id="question" name="question"><b>{questionstr}</b></p>
@@ -72,14 +72,14 @@ def build_html_quiz(qa:dict[str, str]):
 <br><br>
 """
 
-    output_html = ""
-    c = 0
+    output_html:str = ""
+    c:int = 0
     for question, correct_answer in qa.items():
         c += 1
         output_html += template.format(questionid = c, questionstr = question, answer=correct_answer)
     return output_html
 
-
+# build html results from dict of graded questions and answers, student answers, and truths
 def build_html_results(graded:dict[str, tuple[bool, str]], student_answers:list[str],truths:list[str]):
     template="""
 <p id="question" name="question"><b>{questionstr}</b></p>
@@ -209,6 +209,5 @@ def index():
     return render_template('index.html')
 
 def main():
-    webbrowser.open("http://127.0.0.1:5000/")
     app.run(debug=True, host="0.0.0.0", port=5000)
 
