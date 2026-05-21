@@ -3,20 +3,63 @@ from . import tools, pdfextract, signatures, pipeline
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, make_response
-import tempfile
 from hashlib import md5
+import time
 
 # FONTPATH defines a font override if your language is not supported by default fonts
 # This will most likely be the case for any non-Ascii contained characters.
 # If you do not use any problematic characters, set FONTPATH to an empty string ""
 # FONTPATH = ""
 FONTPATH = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+PDF_MAX_AGE_DAYS = 7
+
 
 load_dotenv()
-LM = dspy.LM(model=os.getenv("LLM") or "", api_base=os.getenv("URL"), api_key=os.getenv("KEY"))
+
+MODEL = os.getenv("LLM", "ollama_chat/gemma3:27b")
+URL = os.getenv("URL")
+KEY = os.getenv("KEY")
+
+LM = dspy.LM(model=MODEL, api_base=URL, api_key=KEY)
+
+print("Using", MODEL, "at", URL, "key length:", len(KEY) if KEY else "*ignored*")
+print(dspy.__version__)
+
 dspy.configure(lm=LM)
 
 app = Flask(__name__,template_folder="templates")
+
+def cleanup_old_pdfs(max_age_days=PDF_MAX_AGE_DAYS):
+    """Delete PDFs older than max_age_days from the pdfs directory."""
+    pdfs_dir = "pdfs"
+    if not os.path.exists(pdfs_dir):
+        return
+    
+    current_time = time.time()
+    max_age_seconds = max_age_days * 24 * 60 * 60
+    
+    for filename in os.listdir(pdfs_dir):
+        # dont delete gitkeep files
+        if filename.startswith(".gitkeep"):
+            continue
+
+        filepath = os.path.join(pdfs_dir, filename)
+        if os.path.isfile(filepath):
+            file_age = current_time - os.path.getmtime(filepath)
+            if file_age > max_age_seconds:
+                try:
+                    os.remove(filepath)
+                    print(f"Deleted old PDF: {filepath}")
+                except Exception as e:
+                    print(f"Error deleting {filepath}: {e}")
+
+def pdf_exists(pdf_file:str):
+    """Check if a PDF file exists in the pdfs directory."""
+    return os.path.exists(os.path.join("pdfs", pdf_file)) 
+
+@app.before_request
+def cleanup_on_startup():
+    cleanup_old_pdfs()
 
 def process(pdf_file:str, num_q:int, lang:str, types:list):
     pdf_content = pdfextract.FileContent()
@@ -116,60 +159,67 @@ def index():
         if request.form.get('menu') == "index":
             if 'pdf_file' in request.files:
                 pdf_file = request.files['pdf_file']
-                with tempfile.NamedTemporaryFile(delete=True, suffix=".pdf") as tmp:
-                    pdf_file.save(tmp)
-                    tmp_path = tmp.name
-                    print("temp pdf path: ",tmp_path)
-                    # options
-                    try:
-                        num_questions = int(request.form.get('questionsnumber', 5))  # Default to 5 if not provided
-                        num_questions = 1 if num_questions < 1 else num_questions # make sure its above 0
+                # Save uploaded file to pdfs directory
+                os.makedirs('pdfs', exist_ok=True)
+                upload_filename = f"upload_{int(time.time())}_{md5(pdf_file.filename.encode()).hexdigest()}.pdf"
+                upload_path = os.path.join('pdfs', upload_filename)
 
-                        language_select = request.form.get('langdropdown', 'English')  # Default to English if not provided
-                        selected_options = request.form.getlist("options")  # list of checked values
+                if os.path.exists(upload_path):
+                    os.remove(upload_path)
 
-                        print(selected_options)
+                pdf_file.save(upload_path)
+                print(f"Uploaded PDF saved to: {upload_path}")
+                
+                # options
+                try:
+                    num_questions = int(request.form.get('questionsnumber', 5))  # Default to 5 if not provided
+                    num_questions = 1 if num_questions < 1 else num_questions # make sure its above 0
 
-                        qtypes = [] # question types
-                        if 'qmulti' in selected_options:
-                            qtypes.append(signatures.QuestionType.MULTIPLE_CHOICE.value)
-                        if 'qbool' in selected_options:
-                            qtypes.append(signatures.QuestionType.TRUE_FALSE.value)
-                        if 'qwrite' in selected_options:
-                            qtypes.append(signatures.QuestionType.SHORT_ANSWER.value)
+                    language_select = request.form.get('langdropdown', 'English')  # Default to English if not provided
+                    selected_options = request.form.getlist("options")  # list of checked values
 
-                        print(qtypes)
+                    print(selected_options)
 
-                        if not qtypes:
-                            qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value,
-                                    signatures.QuestionType.TRUE_FALSE.value,
-                                    signatures.QuestionType.SHORT_ANSWER.value]
+                    qtypes = [] # question types
+                    if 'qmulti' in selected_options:
+                        qtypes.append(signatures.QuestionType.MULTIPLE_CHOICE.value)
+                    if 'qbool' in selected_options:
+                        qtypes.append(signatures.QuestionType.TRUE_FALSE.value)
+                    if 'qwrite' in selected_options:
+                        qtypes.append(signatures.QuestionType.SHORT_ANSWER.value)
 
-                        nq,qa,t,ctx = process(pdf_file=tmp_path, num_q=num_questions, lang=language_select, types=qtypes)
+                    print(qtypes)
 
-                        print(ctx)
-                        # nq - new questions
-                        # qa - question / correct answer
-                        # t - topic
-                        # ctx - context
-                        response = None
-                        if 'outputtype' not in selected_options: # pdf output
-                            dlpath = make_pdf(qa, all_text="".join(nq), t=t) # build pdf here
-                            response = make_response(open(dlpath, 'rb').read())
-                            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(dlpath)}'
-                        else: # assemble quiz
-                            html_content = build_html_quiz(qa)
-                            response = render_template(
-                                'quiz.html',
-                                content=html_content,
-                                topic=t,
-                                num_questions=len(nq),
-                                context=ctx)
-                        return response
-                    
-                    except Exception as e:
-                        print(f"Error processing PDF: {e}")
-                        return render_template('index.html', error=str(e) + ". Please revise inputs.")
+                    if not qtypes:
+                        qtypes = [signatures.QuestionType.MULTIPLE_CHOICE.value,
+                                signatures.QuestionType.TRUE_FALSE.value,
+                                signatures.QuestionType.SHORT_ANSWER.value]
+
+                    nq,qa,t,ctx = process(pdf_file=upload_path, num_q=num_questions, lang=language_select, types=qtypes)
+
+                    print(ctx)
+                    # nq - new questions
+                    # qa - question / correct answer
+                    # t - topic
+                    # ctx - context
+                    response = None
+                    if 'outputtype' not in selected_options: # pdf output
+                        dlpath = make_pdf(qa, all_text="".join(nq), t=t) # build pdf here
+                        response = make_response(open(dlpath, 'rb').read())
+                        response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(dlpath)}'
+                    else: # assemble quiz
+                        html_content = build_html_quiz(qa)
+                        response = render_template(
+                            'quiz.html',
+                            content=html_content,
+                            topic=t,
+                            num_questions=len(nq),
+                            context=ctx)
+                    return response
+                
+                except Exception as e:
+                    print(f"Error processing PDF: {e}")
+                    return render_template('index.html', error=str(e) + ". Please revise inputs.")
 
             return render_template('index.html')
         elif request.form.get('menu') == "quiz":
@@ -211,3 +261,5 @@ def index():
 def main():
     app.run(debug=True, host="0.0.0.0", port=5000)
 
+if __name__ == "__main__":
+    main()

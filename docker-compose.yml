@@ -1,0 +1,14 @@
+services:
+  examgen:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+    container_name: examgen-app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
