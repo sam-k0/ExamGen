@@ -9,6 +9,7 @@ services:
       - .env
     environment:
       - FLASK_ENV=production
+      - DOCKERIZED="true"
     container_name: examgen-app
     extra_hosts:
       - "host.docker.internal:host-gateway"

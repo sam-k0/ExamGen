@@ -1,16 +1,24 @@
 import dspy
+from dspy.clients import openai
 from . import tools, pdfextract, signatures, pipeline
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, make_response
 from hashlib import md5
 import time
+import requests
+import logging
 
+
+logging.getLogger("dspy").setLevel(logging.DEBUG)
+
+DOCKERIZED = os.getenv("DOCKERIZED", "false") == "true"
 # FONTPATH defines a font override if your language is not supported by default fonts
 # This will most likely be the case for any non-Ascii contained characters.
 # If you do not use any problematic characters, set FONTPATH to an empty string ""
 # FONTPATH = ""
-FONTPATH = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+FONTPATH = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf" if not DOCKERIZED else "/usr/share/fonts/noto/NotoSansCJK-Regular.ttc"
+
 PDF_MAX_AGE_DAYS = 7
 
 
@@ -19,8 +27,8 @@ load_dotenv()
 MODEL = os.getenv("LLM", "ollama_chat/gemma3:27b")
 URL = os.getenv("URL")
 KEY = os.getenv("KEY")
-
-LM = dspy.LM(model=MODEL, api_base=URL, api_key=KEY)
+MAXTOKENS = int(os.getenv("MAXTOKENS", "5000"))
+LM = dspy.LM(model=MODEL, api_base=URL, api_key=KEY, max_tokens=MAXTOKENS)
 
 print("Using", MODEL, "at", URL, "key length:", len(KEY) if KEY else "*ignored*")
 print(dspy.__version__)

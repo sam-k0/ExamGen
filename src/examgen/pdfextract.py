@@ -58,6 +58,23 @@ def write_pdf(fpath: str, content: list[str], topic = "", font_path=""):
 
     doc.build(story)
 
+def register_cjk_font(styles, font_path, font_name="CJKFont"):
+    if not font_path or not os.path.exists(font_path):
+        return "Normal"
+
+    pdfmetrics.registerFont(TTFont(font_name, font_path))
+
+    style_name = f"{font_name}Style"
+
+    styles.add(ParagraphStyle(
+        name=style_name,
+        parent=styles["Normal"],
+        fontName=font_name,
+        fontSize=12,
+        leading=14
+    ))
+
+    return style_name
 
 def write_pdf_with_answers(fpath: str, content: dict[str,str], topic = "", font_path=""):
     doc = SimpleDocTemplate(fpath, pagesize=letter)
@@ -66,15 +83,12 @@ def write_pdf_with_answers(fpath: str, content: dict[str,str], topic = "", font_
 
     # Use Korean font if specified and available
     if font_path != "" and os.path.exists(font_path):
-        stylename = "KoreanNormal"
-        pdfmetrics.registerFont(TTFont("NanumGothic", font_path))
-        styles.add(ParagraphStyle(
-            name="KoreanNormal",
-            parent=styles["Normal"],
-            fontName="NanumGothic",
-            fontSize=12,
-            leading=14
-        ))
+        stylename = register_cjk_font(
+            styles,
+            font_path=font_path,
+            font_name="NotoSansCJK"
+        )
+
     else:
         print(f"Using fallback font as {font_path} does not exist.")
 
